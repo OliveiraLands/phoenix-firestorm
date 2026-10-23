@@ -290,12 +290,12 @@ void LLVoiceClient::setSpatialVoiceModule(const std::string &voice_server_type)
     }
     if (module != mSpatialVoiceModule)
     {
-        mSpatialVoiceModule = module;
-        if (inProximalChannel())
+        if (mSpatialVoiceModule)
         {
             mSpatialVoiceModule->processChannels(false);
-            mSpatialVoiceModule->processChannels(true);
         }
+        mSpatialVoiceModule = module;
+        mSpatialVoiceModule->processChannels(true);
         mSpatialVoiceModule->updateSettings();
     }
 }

@@ -1700,6 +1700,33 @@ void LLWebRTCVoiceClient::processChannels(bool process)
 
 bool LLWebRTCVoiceClient::inProximalChannel()
 {
+    if (!mProcessChannels || !inSpatialChannel())
+    {
+        return false;
+    }
+
+    // FIRE-36672: If region or parcel disables voice, we are not in proximal channel
+    LLViewerRegion *regionp = gAgent.getRegion();
+    if (!regionp || !regionp->isVoiceEnabled())
+    {
+        return false;
+    }
+
+    LLParcel *parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+    if (parcel && parcel->getLocalID() != INVALID_PARCEL_ID && !parcel->getParcelFlagAllowVoice())
+    {
+        return false;
+    }
+
+    // <FS:PP> FIRE-36672: Voice status indicator behavior change
+    // Only report proximal when a spatial session is established or being negotiated
+    static LLCachedControl<bool> require_established_session(gSavedSettings, "DebugWebRTCRequireEstablishedSpatialSession", false);
+    if (require_established_session)
+    {
+        return (mSession && mSession->isSpatial()) || (mNextSession && mNextSession->isSpatial());
+    }
+    // </FS:PP>
+
     return inSpatialChannel();
 }
 
